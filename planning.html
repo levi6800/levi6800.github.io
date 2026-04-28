@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Travel Planning — My Travel Site</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --parchment:    #f5eedc;
+        --parchment-dk: #e8ddc4;
+        --ink:          #2c1f0e;
+        --ink-light:    #5a4228;
+        --rust:         #b5522a;
+        --gold:         #c99a2e;
+        --gold-light:   #e8c96a;
+        --cream:        #fdf8ef;
+        --platinum:     #b0c4d8;
+        --platinum-dk:  #7a96ad;
+        --silver:       #a8a8a8;
+        --silver-dk:    #787878;
+      }
+
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        font-family: 'Lato', sans-serif;
+        background-color: var(--parchment);
+        color: var(--ink);
+        background-image:
+          repeating-linear-gradient(0deg,   transparent, transparent 59px, rgba(44,31,14,.06) 60px),
+          repeating-linear-gradient(90deg,  transparent, transparent 59px, rgba(44,31,14,.06) 60px);
+        background-size: 60px 60px;
+      }
+
+      /* NAV */
+      nav {
+        background: var(--ink); display: flex; align-items: center;
+        justify-content: space-between; padding: 0 40px; height: 64px;
+        position: sticky; top: 0; z-index: 200; box-shadow: 0 2px 12px rgba(0,0,0,.4);
+      }
+      .nav-logo { font-family: 'Playfair Display', serif; color: var(--gold-light); font-size: 1.35rem; letter-spacing: .04em; text-decoration: none; }
+      .nav-logo span { color: var(--rust); font-style: italic; }
+      nav ul { list-style: none; display: flex; gap: 36px; }
+      nav ul li a {
+        color: var(--parchment); text-decoration: none; font-size: .85rem;
+        font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+        padding-bottom: 4px; border-bottom: 2px solid transparent; transition: color .2s, border-color .2s;
+      }
+      nav ul li a:hover, nav ul li a.active { color: var(--gold-light); border-bottom-color: var(--gold-light); }
+
+      /* PAGE HEADER */
+      .page-header {
+        background: var(--ink); padding: 64px 40px 52px; text-align: center; position: relative; overflow: hidden;
+      }
+      .page-header::before {
+        content: ''; position: absolute; inset: 0;
+        background-image:
+          repeating-linear-gradient(0deg, transparent, transparent 29px, rgba(201,154,46,.07) 30px),
+          repeating-linear-gradient(90deg, transparent, transparent 29px, rgba(201,154,46,.07) 30px);
+        background-size: 30px 30px;
+      }
+      .page-header h1 { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 5vw, 3.2rem); color: var(--cream); position: relative; z-index: 1; }
+      .page-header h1 em { color: var(--gold-light); font-style: italic; }
+      .page-header p { color: var(--parchment-dk); margin-top: 12px; font-size: 1rem; font-weight: 300; letter-spacing: .04em; position: relative; z-index: 1; max-width: 580px; margin-left: auto; margin-right: auto; }
+
+      /* INTRO STRIP */
+      .intro-strip {
+        background: var(--cream); border-top: 3px solid var(--gold); border-bottom: 3px solid var(--gold);
+        padding: 32px 40px; text-align: center;
+      }
+      .intro-strip p { font-size: 1rem; line-height: 1.75; color: var(--ink-light); max-width: 700px; margin: 0 auto; }
+      .intro-strip strong { color: var(--ink); }
+
+      /* PRICING SECTION */
+      .pricing-section { padding: 72px 40px 80px; }
+
+      .section-header { text-align: center; margin-bottom: 56px; }
+      .section-header h2 {
+        font-family: 'Playfair Display', serif; font-size: 2.2rem; color: var(--ink);
+        display: inline-flex; align-items: center; gap: 14px;
+      }
+      .section-header h2::before, .section-header h2::after { content: '✦'; color: var(--gold); font-size: 1rem; }
+      .section-header p { margin-top: 10px; color: var(--ink-light); font-size: .95rem; font-weight: 300; }
+
+      /* TIER CARDS */
+      .tiers-wrap {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 36px;
+        max-width: 1100px;
+        margin: 0 auto;
+        align-items: start;
+      }
+
+      .tier-card {
+        border-radius: 4px; overflow: hidden;
+        box-shadow: 6px 6px 0 var(--ink-light);
+        border: 1px solid var(--parchment-dk);
+        background: var(--cream);
+        display: flex; flex-direction: column;
+        transition: transform .25s, box-shadow .25s;
+        position: relative;
+      }
+      .tier-card:hover { transform: translate(-3px,-3px); }
+
+      /* Tier header bands */
+      .tier-header {
+        padding: 28px 28px 22px;
+        position: relative;
+        text-align: center;
+      }
+      .tier-badge {
+        display: inline-block; font-size: .68rem; letter-spacing: .2em;
+        text-transform: uppercase; font-weight: 700;
+        padding: 4px 14px; border-radius: 20px; margin-bottom: 12px;
+      }
+      .tier-header h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 2rem;
+        line-height: 1.1;
+        margin-bottom: 6px;
+      }
+      .tier-price {
+        font-size: 1.6rem; font-weight: 700; letter-spacing: .02em;
+        margin-bottom: 4px;
+      }
+      .tier-price sup { font-size: .9rem; vertical-align: super; }
+      .tier-price-note { font-size: .8rem; font-weight: 300; letter-spacing: .06em; opacity: .8; }
+
+      /* Platinum */
+      .tier-platinum .tier-header { background: linear-gradient(135deg, #1a2e3f 0%, #2c4a5e 100%); }
+      .tier-platinum .tier-badge { background: rgba(176,196,216,.2); color: var(--platinum); border: 1px solid var(--platinum); }
+      .tier-platinum .tier-header h2 { color: var(--platinum); }
+      .tier-platinum .tier-price { color: #d4e8f5; }
+      .tier-platinum .tier-price-note { color: var(--platinum); }
+      .tier-platinum:hover { box-shadow: 6px 6px 0 var(--platinum-dk); }
+
+      /* Gold */
+      .tier-gold .tier-header { background: linear-gradient(135deg, #2c1f0e 0%, #4a3210 100%); }
+      .tier-gold .tier-badge { background: rgba(201,154,46,.15); color: var(--gold-light); border: 1px solid var(--gold); }
+      .tier-gold .tier-header h2 { color: var(--gold-light); }
+      .tier-gold .tier-price { color: var(--gold-light); }
+      .tier-gold .tier-price-note { color: var(--gold); }
+      .tier-gold:hover { box-shadow: 6px 6px 0 var(--gold); }
+
+      /* Silver */
+      .tier-silver .tier-header { background: linear-gradient(135deg, #2e2e2e 0%, #484848 100%); }
+      .tier-silver .tier-badge { background: rgba(168,168,168,.15); color: #d8d8d8; border: 1px solid var(--silver); }
+      .tier-silver .tier-header h2 { color: #e8e8e8; }
+      .tier-silver .tier-price { color: #e0e0e0; }
+      .tier-silver .tier-price-note { color: var(--silver); }
+      .tier-silver:hover { box-shadow: 6px 6px 0 var(--silver); }
+
+      /* Tier body */
+      .tier-body { padding: 28px 28px 32px; flex: 1; }
+
+      .tier-tagline {
+        font-style: italic; font-family: 'Playfair Display', serif;
+        font-size: 1rem; color: var(--ink-light);
+        margin-bottom: 20px; line-height: 1.5;
+        padding-bottom: 18px; border-bottom: 1px solid var(--parchment-dk);
+      }
+
+      .feature-list { list-style: none; margin-bottom: 28px; }
+      .feature-list li {
+        display: flex; align-items: flex-start; gap: 10px;
+        padding: 8px 0; border-bottom: 1px dotted var(--parchment-dk);
+        font-size: .9rem; line-height: 1.5; color: var(--ink-light);
+      }
+      .feature-list li:last-child { border-bottom: none; }
+      .feature-icon { flex-shrink: 0; font-size: 1rem; margin-top: 1px; }
+
+      /* Platinum icon color */
+      .tier-platinum .feature-icon { color: var(--platinum-dk); }
+      /* Gold icon color */
+      .tier-gold .feature-icon { color: var(--gold); }
+      /* Silver icon color */
+      .tier-silver .feature-icon { color: var(--silver-dk); }
+
+      .tier-cta {
+        display: block; width: 100%; padding: 13px 20px; text-align: center;
+        font-family: 'Lato', sans-serif; font-size: .82rem; font-weight: 700;
+        letter-spacing: .14em; text-transform: uppercase; border: none;
+        border-radius: 2px; cursor: pointer; text-decoration: none;
+        transition: background .2s, color .2s, transform .15s;
+      }
+      .tier-cta:hover { transform: translateY(-2px); }
+      .tier-platinum .tier-cta { background: var(--platinum-dk); color: #fff; }
+      .tier-platinum .tier-cta:hover { background: var(--platinum); }
+      .tier-gold .tier-cta { background: var(--gold); color: var(--ink); }
+      .tier-gold .tier-cta:hover { background: var(--gold-light); }
+      .tier-silver .tier-cta { background: var(--silver-dk); color: #fff; }
+      .tier-silver .tier-cta:hover { background: var(--silver); }
+
+      /* MOST POPULAR RIBBON */
+      .ribbon {
+        position: absolute; top: 18px; right: -10px;
+        background: var(--rust); color: #fff;
+        font-size: .65rem; font-weight: 700; letter-spacing: .15em;
+        text-transform: uppercase; padding: 5px 18px;
+        box-shadow: 0 2px 6px rgba(0,0,0,.3);
+        clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%);
+      }
+
+      /* PRICE CALCULATOR */
+      .calculator-section { padding: 0 40px 80px; }
+      .calculator-wrap {
+        background: var(--ink); border-radius: 4px; max-width: 700px; margin: 0 auto;
+        padding: 44px 48px; box-shadow: 6px 6px 0 var(--ink-light);
+        position: relative; overflow: hidden;
+      }
+      .calculator-wrap::before {
+        content: ''; position: absolute; inset: 0;
+        background-image:
+          repeating-linear-gradient(0deg, transparent, transparent 29px, rgba(201,154,46,.06) 30px),
+          repeating-linear-gradient(90deg, transparent, transparent 29px, rgba(201,154,46,.06) 30px);
+        background-size: 30px 30px;
+        pointer-events: none;
+      }
+      .calculator-wrap h3 {
+        font-family: 'Playfair Display', serif; font-size: 1.6rem;
+        color: var(--gold-light); margin-bottom: 6px; position: relative; z-index: 1;
+      }
+      .calculator-wrap > p { color: var(--parchment-dk); font-size: .88rem; margin-bottom: 28px; position: relative; z-index: 1; }
+
+      .calc-row { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; position: relative; z-index: 1; }
+      .calc-field { flex: 1; min-width: 140px; }
+      .calc-field label { display: block; font-size: .75rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--parchment-dk); margin-bottom: 7px; }
+      .calc-field input, .calc-field select {
+        width: 100%; padding: 10px 14px;
+        background: rgba(255,255,255,.07); border: 1px solid rgba(201,154,46,.3);
+        border-radius: 2px; color: var(--cream); font-family: 'Lato', sans-serif;
+        font-size: .95rem; outline: none; transition: border-color .2s;
+      }
+      .calc-field input:focus, .calc-field select:focus { border-color: var(--gold); }
+      .calc-field select option { background: var(--ink); color: var(--cream); }
+
+      .calc-result {
+        background: rgba(201,154,46,.1); border: 1px solid rgba(201,154,46,.3);
+        border-radius: 2px; padding: 20px 24px; margin-top: 8px;
+        position: relative; z-index: 1; min-height: 80px;
+        display: flex; align-items: center; justify-content: space-between;
+        flex-wrap: wrap; gap: 12px;
+      }
+      .calc-result-label { font-size: .75rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--parchment-dk); margin-bottom: 4px; }
+      .calc-result-amount { font-family: 'Playfair Display', serif; font-size: 2.2rem; color: var(--gold-light); }
+      .calc-result-breakdown { font-size: .82rem; color: var(--parchment-dk); line-height: 1.6; }
+      .calc-result-placeholder { color: var(--ink-light); font-style: italic; font-size: .9rem; }
+
+      /* FAQ */
+      .faq-section { padding: 0 40px 80px; max-width: 800px; margin: 0 auto; }
+      .faq-section h3 {
+        font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--ink);
+        text-align: center; margin-bottom: 32px;
+        display: flex; align-items: center; justify-content: center; gap: 14px;
+      }
+      .faq-section h3::before, .faq-section h3::after { content: '✦'; color: var(--gold); font-size: .9rem; }
+
+      .faq-item { border-bottom: 1px solid var(--parchment-dk); }
+      .faq-question {
+        width: 100%; background: none; border: none; text-align: left;
+        padding: 18px 0; font-family: 'Lato', sans-serif; font-size: .95rem;
+        font-weight: 700; color: var(--ink); cursor: pointer;
+        display: flex; justify-content: space-between; align-items: center; gap: 12px;
+      }
+      .faq-question:hover { color: var(--rust); }
+      .faq-icon { font-size: 1.2rem; color: var(--gold); transition: transform .25s; flex-shrink: 0; }
+      .faq-item.open .faq-icon { transform: rotate(45deg); }
+      .faq-answer { max-height: 0; overflow: hidden; transition: max-height .35s ease; }
+      .faq-answer p { padding: 0 0 18px; font-size: .9rem; line-height: 1.75; color: var(--ink-light); }
+
+      /* COMPASS DIVIDER */
+      .compass-divider { display: flex; align-items: center; justify-content: center; gap: 20px; padding: 0 0 52px; }
+      .compass-divider::before { content: ''; flex: 1; max-width: 280px; height: 1px; background: linear-gradient(to right, transparent, var(--gold)); }
+      .compass-divider::after  { content: ''; flex: 1; max-width: 280px; height: 1px; background: linear-gradient(to left,  transparent, var(--gold)); }
+
+      /* FOOTER */
+      footer { background: var(--ink); color: var(--parchment-dk); text-align: center; padding: 36px 20px; font-size: .82rem; letter-spacing: .06em; }
+      footer span { color: var(--gold); }
+
+      /* MODAL */
+      .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(44,31,14,.75); z-index: 500; align-items: center; justify-content: center; padding: 20px; }
+      .modal-overlay.open { display: flex; }
+      .modal { background: var(--cream); max-width: 520px; width: 100%; border-radius: 4px; box-shadow: 8px 8px 0 var(--ink); padding: 40px; position: relative; }
+      .modal-close { position: absolute; top: 14px; right: 16px; background: var(--ink); color: var(--gold-light); border: none; font-size: 1.3rem; width: 34px; height: 34px; border-radius: 2px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+      .modal-close:hover { background: var(--rust); }
+      .modal h3 { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--ink); margin-bottom: 8px; }
+      .modal p { font-size: .92rem; line-height: 1.7; color: var(--ink-light); margin-bottom: 16px; }
+      .modal-form label { display: block; font-size: .75rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-light); margin-bottom: 6px; margin-top: 14px; }
+      .modal-form input, .modal-form textarea {
+        width: 100%; padding: 10px 12px; border: 1px solid var(--parchment-dk);
+        background: var(--parchment); border-radius: 2px; font-family: 'Lato', sans-serif;
+        font-size: .9rem; color: var(--ink); outline: none;
+      }
+      .modal-form input:focus, .modal-form textarea:focus { border-color: var(--gold); }
+      .modal-form textarea { height: 90px; resize: vertical; }
+      .modal-submit { margin-top: 20px; width: 100%; padding: 12px; background: var(--ink); color: var(--gold-light); border: none; border-radius: 2px; font-family: 'Lato', sans-serif; font-size: .82rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; cursor: pointer; transition: background .2s; }
+      .modal-submit:hover { background: var(--rust); }
+      .modal-tier-badge { display: inline-block; font-size: .7rem; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; margin-bottom: 14px; }
+      .badge-platinum { background: #dde8f0; color: var(--platinum-dk); }
+      .badge-gold     { background: #f5ead0; color: #8a6510; }
+      .badge-silver   { background: #e8e8e8; color: var(--silver-dk); }
+    </style>
+  </head>
+  <body>
+
+    <nav>
+      <a class="nav-logo" href="index.html">The <span>Wandering</span> Atlas</a>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="destinations.html">Destinations</a></li>
+        <li><a href="planning.html" class="active">Travel Planning</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </nav>
+
+    <header class="page-header">
+      <h1>Let Me Plan Your <em>Perfect</em> Trip</h1>
+      <p>Choose a tier that fits your travel style. Every package is built on first-hand experience — these are places I've actually been.</p>
+    </header>
+
+    <div class="intro-strip">
+      <p>Whether you want every minute mapped out or just a solid framework to work from, there's a package for you. Pricing is simple: <strong>a flat daily rate</strong> based on the number of days you're travelling. The more days, the more work goes in — and the more extraordinary your trip will be.</p>
+    </div>
+
+    <!-- TIER CARDS -->
+    <section class="pricing-section">
+      <div class="section-header">
+        <h2>Choose Your Tier</h2>
+        <p>All packages include a personalised consultation before planning begins.</p>
+      </div>
+
+      <div class="tiers-wrap">
+
+        <!-- PLATINUM -->
+        <div class="tier-card tier-platinum">
+          <div class="tier-header">
+            <div class="tier-badge">Platinum</div>
+            <h2>The Full Experience</h2>
+            <div class="tier-price"><sup>$</sup>100 <span style="font-size:1rem;font-weight:300;">/ day</span></div>
+            <div class="tier-price-note">e.g. 7 days = $700 total</div>
+          </div>
+          <div class="tier-body">
+            <p class="tier-tagline">"For the traveller who wants every detail handled and every moment to feel intentional."</p>
+            <ul class="feature-list">
+              <li><span class="feature-icon">🧭</span><span><strong>Minute-by-minute daily itinerary</strong> — exactly where to be, when, and why, from morning coffee to evening wind-down.</span></li>
+              <li><span class="feature-icon">⭐</span><span><strong>Must-do highlights flagged</strong> — the non-negotiables called out clearly so nothing extraordinary gets missed.</span></li>
+              <li><span class="feature-icon">📖</span><span><strong>Curated travel reading list</strong> — books, essays, and films to deepen your connection to each destination before you arrive.</span></li>
+              <li><span class="feature-icon">🎟️</span><span><strong>All reservations made for you</strong> — restaurants, tours, museums, transfers, and experiences fully booked on your behalf.</span></li>
+              <li><span class="feature-icon">💡</span><span><strong>Fun facts & local secrets woven in</strong> — cultural context, historical details, and insider knowledge throughout your itinerary.</span></li>
+              <li><span class="feature-icon">🗺️</span><span><strong>Custom digital travel guide</strong> — a beautiful, printable day-by-day document you can take with you offline.</span></li>
+              <li><span class="feature-icon">📞</span><span><strong>Priority support</strong> — direct access throughout your trip for any last-minute changes or questions.</span></li>
+            </ul>
+            <a href="#" class="tier-cta" onclick="openModal('platinum'); return false;">Book Platinum →</a>
+          </div>
+        </div>
+
+        <!-- GOLD -->
+        <div class="tier-card tier-gold" style="position:relative;">
+          <div class="ribbon">Most Popular</div>
+          <div class="tier-header">
+            <div class="tier-badge">Gold</div>
+            <h2>The Smart Traveller</h2>
+            <div class="tier-price"><sup>$</sup>50 <span style="font-size:1rem;font-weight:300;">/ day</span></div>
+            <div class="tier-price-note">e.g. 7 days = $350 total</div>
+          </div>
+          <div class="tier-body">
+            <p class="tier-tagline">"Flexibility built in, logistics taken care of — you just show up and enjoy."</p>
+            <ul class="feature-list">
+              <li><span class="feature-icon">🕐</span><span><strong>Hour-by-hour itinerary</strong> — a structured but breathable daily plan that keeps you on track without over-scheduling.</span></li>
+              <li><span class="feature-icon">🍽️</span><span><strong>All reservations booked for you</strong> — restaurants, key attractions, and experiences are all confirmed before you depart.</span></li>
+              <li><span class="feature-icon">⭐</span><span><strong>Must-do highlights called out</strong> — the essential experiences clearly identified so your priorities are always clear.</span></li>
+              <li><span class="feature-icon">🗂️</span><span><strong>Organised day-by-day document</strong> — a clean, easy-to-follow travel plan you can reference throughout your trip.</span></li>
+              <li><span class="feature-icon">💬</span><span><strong>Pre-trip consultation included</strong> — a personal conversation to understand your travel style, pace, and preferences.</span></li>
+              <li><span class="feature-icon">📍</span><span><strong>Neighbourhood & logistics notes</strong> — practical guidance on getting around, best areas to stay, and what to skip.</span></li>
+            </ul>
+            <a href="#" class="tier-cta" onclick="openModal('gold'); return false;">Book Gold →</a>
+          </div>
+        </div>
+
+        <!-- SILVER -->
+        <div class="tier-card tier-silver">
+          <div class="tier-header">
+            <div class="tier-badge">Silver</div>
+            <h2>The Independent Explorer</h2>
+            <div class="tier-price"><sup>$</sup>30 <span style="font-size:1rem;font-weight:300;">/ day</span></div>
+            <div class="tier-price-note">e.g. 7 days = $210 total</div>
+          </div>
+          <div class="tier-body">
+            <p class="tier-tagline">"A solid roadmap that points you in the right direction — the adventure is yours to own."</p>
+            <ul class="feature-list">
+              <li><span class="feature-icon">🕐</span><span><strong>Hour-by-hour itinerary</strong> — a thoughtfully structured daily framework to keep your trip organised and well-paced.</span></li>
+              <li><span class="feature-icon">🔗</span><span><strong>Booking links provided</strong> — direct links to reserve restaurants, tours, and experiences yourself, at your convenience.</span></li>
+              <li><span class="feature-icon">📍</span><span><strong>Key destination callouts</strong> — the most important places to visit each day, clearly listed with brief descriptions.</span></li>
+              <li><span class="feature-icon">🗂️</span><span><strong>Clean travel framework document</strong> — a simple, readable plan you can adapt, share, or print.</span></li>
+              <li><span class="feature-icon">💬</span><span><strong>Pre-trip consultation included</strong> — a quick conversation to make sure the plan fits your style and budget.</span></li>
+            </ul>
+            <a href="#" class="tier-cta" onclick="openModal('silver'); return false;">Book Silver →</a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- PRICE CALCULATOR -->
+    <section class="calculator-section">
+      <div class="calculator-wrap">
+        <h3>✦ Trip Price Calculator</h3>
+        <p>Enter your trip details below to get an instant estimate.</p>
+        <div class="calc-row">
+          <div class="calc-field">
+            <label for="calc-days">Number of Days</label>
+            <input type="number" id="calc-days" min="1" max="365" placeholder="e.g. 10" oninput="calcPrice()"/>
+          </div>
+          <div class="calc-field">
+            <label for="calc-tier">Package Tier</label>
+            <select id="calc-tier" onchange="calcPrice()">
+              <option value="">— Select a tier —</option>
+              <option value="100">Platinum — $100/day</option>
+              <option value="50">Gold — $50/day</option>
+              <option value="30">Silver — $30/day</option>
+            </select>
+          </div>
+        </div>
+        <div class="calc-result" id="calcResult">
+          <span class="calc-result-placeholder">Enter days and select a tier above to see your total.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq-section">
+      <h3>Common Questions</h3>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          How do I get started? <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          <p>Click any "Book" button above, fill in a short form with your destination, travel dates, and any notes, and I'll be in touch within 48 hours to schedule a consultation call. Planning typically begins 2–4 weeks before your departure date.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          What destinations can you plan? <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          <p>I can plan trips to any of the destinations on the Destinations page — these are all places I've personally visited and know well. For other destinations, reach out and we can discuss whether it's a good fit.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          When do I pay? <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          <p>A 50% deposit is due when you confirm your package. The remaining 50% is due when your completed itinerary is delivered — typically 5–7 days before your trip. All payments are processed securely.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Does the price include flights or accommodation? <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          <p>No — the planning fee covers the itinerary and booking service only. Flights, accommodation, and activity costs are paid directly by you. For Platinum and Gold packages I will research and recommend specific hotels and flights, and can book them on your behalf (at cost).</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Can I upgrade my tier after booking? <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          <p>Yes — you can upgrade at any point before planning is complete. You'll simply pay the difference in the daily rate. Downgrades are handled case by case depending on how much work has already been done.</p>
+        </div>
+      </div>
+
+    </section>
+
+    <div class="compass-divider">
+      <svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="32" cy="32" r="30" stroke="#c99a2e" stroke-width="1" fill="none" opacity=".5"/>
+        <circle cx="32" cy="32" r="4" fill="#c99a2e"/>
+        <polygon points="32,4 29,28 32,24 35,28" fill="#b5522a"/>
+        <polygon points="32,60 29,36 32,40 35,36" fill="#c99a2e" opacity=".7"/>
+        <polygon points="60,32 36,29 40,32 36,35" fill="#c99a2e" opacity=".7"/>
+        <polygon points="4,32 28,29 24,32 28,35" fill="#c99a2e" opacity=".7"/>
+        <line x1="32" y1="2"  x2="32" y2="8"  stroke="#c99a2e" stroke-width="1.5" opacity=".6"/>
+        <line x1="32" y1="56" x2="32" y2="62" stroke="#c99a2e" stroke-width="1.5" opacity=".6"/>
+        <line x1="2"  y1="32" x2="8"  y2="32" stroke="#c99a2e" stroke-width="1.5" opacity=".6"/>
+        <line x1="56" y1="32" x2="62" y2="32" stroke="#c99a2e" stroke-width="1.5" opacity=".6"/>
+        <text x="29" y="20" fill="#e8c96a" font-size="7" font-family="serif" font-weight="bold">N</text>
+      </svg>
+    </div>
+
+    <footer>
+      <p>© 2025 The Wandering Atlas &nbsp;·&nbsp; Made with <span>♥</span> and a sense of adventure</p>
+    </footer>
+
+    <!-- BOOKING MODAL -->
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal">
+        <button class="modal-close" onclick="closeModal()">✕</button>
+        <div class="modal-tier-badge" id="modalBadge"></div>
+        <h3 id="modalTitle">Book Your Trip</h3>
+        <p id="modalSubtitle"></p>
+        <div class="modal-form">
+          <label>Your Name</label>
+          <input type="text" placeholder="Jane Smith"/>
+          <label>Email Address</label>
+          <input type="email" placeholder="jane@example.com"/>
+          <label>Destination(s)</label>
+          <input type="text" placeholder="e.g. Lisbon, Portugal"/>
+          <label>Travel Dates</label>
+          <input type="text" placeholder="e.g. June 10 – June 17"/>
+          <label>Anything else I should know?</label>
+          <textarea placeholder="Dietary needs, pace preferences, special occasions..."></textarea>
+          <button class="modal-submit" onclick="submitForm()">Send My Request →</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Calculator
+      function calcPrice() {
+        const days = parseInt(document.getElementById('calc-days').value);
+        const rate = parseInt(document.getElementById('calc-tier').value);
+        const el = document.getElementById('calcResult');
+        if (!days || !rate || days < 1) {
+          el.innerHTML = '<span class="calc-result-placeholder">Enter days and select a tier above to see your total.</span>';
+          return;
+        }
+        const total = days * rate;
+        const tierName = rate === 100 ? 'Platinum' : rate === 50 ? 'Gold' : 'Silver';
+        el.innerHTML = `
+          <div>
+            <div class="calc-result-label">Estimated Total</div>
+            <div class="calc-result-amount">$${total.toLocaleString()}</div>
+          </div>
+          <div class="calc-result-breakdown">
+            ${tierName} package<br>
+            ${days} day${days !== 1 ? 's' : ''} × $${rate}/day<br>
+            <em style="color:var(--gold);font-size:.78rem;">50% deposit = $${(total/2).toLocaleString()}</em>
+          </div>
+        `;
+      }
+
+      // FAQ accordion
+      function toggleFaq(btn) {
+        const item = btn.closest('.faq-item');
+        const answer = item.querySelector('.faq-answer');
+        const isOpen = item.classList.contains('open');
+        document.querySelectorAll('.faq-item.open').forEach(i => {
+          i.classList.remove('open');
+          i.querySelector('.faq-answer').style.maxHeight = null;
+        });
+        if (!isOpen) {
+          item.classList.add('open');
+          answer.style.maxHeight = answer.scrollHeight + 'px';
+        }
+      }
+
+      // Modal
+      const tiers = {
+        platinum: {
+          badge: 'Platinum', badgeClass: 'badge-platinum',
+          title: 'Book Platinum Package',
+          subtitle: 'Minute-by-minute planning, curated reading list, all reservations handled. $100/day.'
+        },
+        gold: {
+          badge: 'Gold', badgeClass: 'badge-gold',
+          title: 'Book Gold Package',
+          subtitle: 'Hour-by-hour itinerary with all reservations booked for you. $50/day.'
+        },
+        silver: {
+          badge: 'Silver', badgeClass: 'badge-silver',
+          title: 'Book Silver Package',
+          subtitle: 'Hour-by-hour itinerary with direct booking links so you stay in control. $30/day.'
+        },
+      };
+
+      function openModal(tier) {
+        const t = tiers[tier];
+        const badge = document.getElementById('modalBadge');
+        badge.textContent = t.badge;
+        badge.className = 'modal-tier-badge ' + t.badgeClass;
+        document.getElementById('modalTitle').textContent = t.title;
+        document.getElementById('modalSubtitle').textContent = t.subtitle;
+        document.getElementById('modalOverlay').classList.add('open');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeModal() {
+        document.getElementById('modalOverlay').classList.remove('open');
+        document.body.style.overflow = '';
+      }
+
+      document.getElementById('modalOverlay').addEventListener('click', e => {
+        if (e.target === document.getElementById('modalOverlay')) closeModal();
+      });
+
+      function submitForm() {
+        alert('Thanks for your enquiry! I\'ll be in touch within 48 hours to get your trip planning underway.');
+        closeModal();
+      }
+    </script>
+
+  </body>
+</html>
