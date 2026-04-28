@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Destinations — My Travel Site</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --parchment:    #f5eedc;
+        --parchment-dk: #e8ddc4;
+        --ink:          #2c1f0e;
+        --ink-light:    #5a4228;
+        --rust:         #b5522a;
+        --gold:         #c99a2e;
+        --gold-light:   #e8c96a;
+        --cream:        #fdf8ef;
+      }
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: 'Lato', sans-serif;
+        background-color: var(--parchment);
+        color: var(--ink);
+        background-image:
+          repeating-linear-gradient(0deg,   transparent, transparent 59px, rgba(44,31,14,.06) 60px),
+          repeating-linear-gradient(90deg,  transparent, transparent 59px, rgba(44,31,14,.06) 60px);
+        background-size: 60px 60px;
+      }
+
+      /* NAV */
+      nav {
+        background: var(--ink); display: flex; align-items: center;
+        justify-content: space-between; padding: 0 40px; height: 64px;
+        position: sticky; top: 0; z-index: 200; box-shadow: 0 2px 12px rgba(0,0,0,.4);
+      }
+      .nav-logo { font-family: 'Playfair Display', serif; color: var(--gold-light); font-size: 1.35rem; letter-spacing: .04em; text-decoration: none; }
+      .nav-logo span { color: var(--rust); font-style: italic; }
+      nav ul { list-style: none; display: flex; gap: 36px; }
+      nav ul li a {
+        color: var(--parchment); text-decoration: none; font-size: .85rem;
+        font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+        padding-bottom: 4px; border-bottom: 2px solid transparent; transition: color .2s, border-color .2s;
+      }
+      nav ul li a:hover, nav ul li a.active { color: var(--gold-light); border-bottom-color: var(--gold-light); }
+
+      /* PAGE HEADER */
+      .page-header {
+        background: var(--ink); padding: 64px 40px 52px; text-align: center;
+        position: relative; overflow: hidden;
+      }
+      .page-header::before {
+        content: '';
+        position: absolute; inset: 0;
+        background-image: repeating-linear-gradient(0deg, transparent, transparent 29px, rgba(201,154,46,.07) 30px),
+                          repeating-linear-gradient(90deg, transparent, transparent 29px, rgba(201,154,46,.07) 30px);
+        background-size: 30px 30px;
+      }
+      .page-header h1 {
+        font-family: 'Playfair Display', serif; font-size: clamp(2rem, 5vw, 3.2rem);
+        color: var(--cream); position: relative; z-index: 1;
+      }
+      .page-header h1 em { color: var(--gold-light); font-style: italic; }
+      .page-header p { color: var(--parchment-dk); margin-top: 12px; font-size: 1rem; font-weight: 300; letter-spacing: .04em; position: relative; z-index: 1; }
+
+      /* FILTER TABS */
+      .filter-bar {
+        display: flex; flex-wrap: wrap; justify-content: center;
+        gap: 10px; padding: 32px 40px 20px;
+      }
+      .filter-btn {
+        background: none; border: 1.5px solid var(--ink-light);
+        color: var(--ink-light); font-family: 'Lato', sans-serif;
+        font-size: .75rem; font-weight: 700; letter-spacing: .14em;
+        text-transform: uppercase; padding: 7px 18px; border-radius: 2px;
+        cursor: pointer; transition: all .2s;
+      }
+      .filter-btn:hover { border-color: var(--gold); color: var(--gold); }
+      .filter-btn.active { background: var(--ink); border-color: var(--ink); color: var(--gold-light); }
+
+      /* GRID */
+      .destinations-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 28px; max-width: 1200px; margin: 0 auto;
+        padding: 20px 40px 80px;
+      }
+
+      /* CARD */
+      .card {
+        background: var(--cream); border-radius: 4px; overflow: hidden;
+        box-shadow: 4px 4px 0 var(--ink-light); border: 1px solid var(--parchment-dk);
+        transition: transform .25s, box-shadow .25s;
+        cursor: pointer; display: flex; flex-direction: column;
+      }
+      .card:hover { transform: translate(-3px,-3px); box-shadow: 7px 7px 0 var(--rust); }
+      .card.hidden { display: none; }
+      .card-img { width: 100%; height: 200px; object-fit: cover; display: block; filter: sepia(.15) contrast(1.05); transition: filter .3s; }
+      .card:hover .card-img { filter: sepia(0) contrast(1.1); }
+      .card-body { padding: 18px 20px 22px; flex: 1; display: flex; flex-direction: column; }
+      .card-tag { font-size: .68rem; letter-spacing: .18em; text-transform: uppercase; color: var(--rust); font-weight: 700; margin-bottom: 5px; }
+      .card-body h3 { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--ink); line-height: 1.2; margin-bottom: 8px; }
+      .card-body p { font-size: .88rem; line-height: 1.6; color: var(--ink-light); font-weight: 300; flex: 1; }
+      .card-link { display: inline-block; margin-top: 14px; font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 700; color: var(--rust); border-bottom: 1px solid var(--rust); padding-bottom: 1px; }
+
+      /* MODAL OVERLAY */
+      .modal-overlay {
+        display: none; position: fixed; inset: 0;
+        background: rgba(44,31,14,.75); z-index: 500;
+        align-items: center; justify-content: center;
+        padding: 20px;
+      }
+      .modal-overlay.open { display: flex; }
+
+      .modal {
+        background: var(--cream); max-width: 700px; width: 100%;
+        max-height: 90vh; overflow-y: auto; border-radius: 4px;
+        box-shadow: 8px 8px 0 var(--ink); position: relative;
+      }
+      .modal-img { width: 100%; height: 280px; object-fit: cover; display: block; filter: sepia(.1); }
+      .modal-body { padding: 32px 36px 40px; }
+      .modal-tag { font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; color: var(--rust); font-weight: 700; margin-bottom: 8px; }
+      .modal-body h2 { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--ink); margin-bottom: 6px; }
+      .modal-meta { font-size: .82rem; color: var(--ink-light); font-weight: 700; letter-spacing: .06em; margin-bottom: 18px; }
+      .modal-meta span { color: var(--gold); margin: 0 8px; }
+      .modal-desc { font-size: .95rem; line-height: 1.75; color: var(--ink-light); margin-bottom: 24px; }
+
+      .modal-section-title {
+        font-family: 'Playfair Display', serif; font-size: 1.1rem;
+        color: var(--ink); margin-bottom: 10px; padding-bottom: 6px;
+        border-bottom: 1px solid var(--parchment-dk);
+      }
+      .itinerary { margin-bottom: 24px; }
+      .itinerary-day { margin-bottom: 12px; }
+      .itinerary-day strong { font-size: .82rem; letter-spacing: .08em; text-transform: uppercase; color: var(--rust); display: block; margin-bottom: 3px; }
+      .itinerary-day p { font-size: .88rem; line-height: 1.6; color: var(--ink-light); }
+
+      .modal-close {
+        position: absolute; top: 14px; right: 18px;
+        background: var(--ink); color: var(--gold-light);
+        border: none; font-size: 1.4rem; width: 36px; height: 36px;
+        border-radius: 2px; cursor: pointer; line-height: 1;
+        display: flex; align-items: center; justify-content: center;
+        font-family: sans-serif; z-index: 10;
+      }
+      .modal-close:hover { background: var(--rust); }
+
+      /* FOOTER */
+      footer { background: var(--ink); color: var(--parchment-dk); text-align: center; padding: 36px 20px; font-size: .82rem; letter-spacing: .06em; }
+      footer span { color: var(--gold); }
+    </style>
+  </head>
+  <body>
+
+    <nav>
+      <a class="nav-logo" href="index.html">The <span>Wandering</span> Atlas</a>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="destinations.html" class="active">Destinations</a></li>
+        <li><a href="#">Travel Planning</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </nav>
+
+    <header class="page-header">
+      <h1>Places I've <em>Been</em></h1>
+      <p>Every destination below is somewhere I've personally explored — click any card for itineraries & travel tips.</p>
+    </header>
+
+    <div class="filter-bar">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="europe">Europe</button>
+      <button class="filter-btn" data-filter="north-america">North America</button>
+      <button class="filter-btn" data-filter="south-america">South America</button>
+      <button class="filter-btn" data-filter="caribbean">Caribbean</button>
+    </div>
+
+    <div class="destinations-grid" id="grid">
+      <!-- Cards injected by JS -->
+    </div>
+
+    <!-- MODAL -->
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal" id="modal">
+        <button class="modal-close" id="modalClose">✕</button>
+        <img class="modal-img" id="modalImg" src="" alt=""/>
+        <div class="modal-body">
+          <div class="modal-tag" id="modalTag"></div>
+          <h2 id="modalTitle"></h2>
+          <div class="modal-meta" id="modalMeta"></div>
+          <p class="modal-desc" id="modalDesc"></p>
+          <div class="itinerary">
+            <div class="modal-section-title">Suggested Itinerary</div>
+            <div id="modalItinerary"></div>
+          </div>
+          <div>
+            <div class="modal-section-title">Best Time to Visit</div>
+            <p class="modal-desc" id="modalTime"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p>© 2025 The Wandering Atlas &nbsp;·&nbsp; Made with <span>♥</span> and a sense of adventure</p>
+    </footer>
+
+    <script>
+      const destinations = [
+        {
+          id: 'bogota',
+          name: 'Bogotá, Colombia',
+          region: 'South America',
+          filter: 'south-america',
+          img: 'https://images.unsplash.com/photo-1597006556419-b0f8e39a1c58?w=800&q=80',
+          desc: 'A city of vivid street art, rich coffee culture, and a historic old town known as La Candelaria that blends colonial charm with modern energy.',
+          full: 'Bogotá sits at 2,600 metres above sea level in the Colombian Andes, giving it an eternal spring-like climate. Beyond La Candelaria, the city buzzes with world-class restaurants, a booming craft-beer scene, and one of South America\'s best-preserved pre-Columbian gold collections at the Museo del Oro.',
+          bestTime: 'December to March and July to August offer the driest weather. Avoid April–May which is peak rainy season.',
+          suggestedDays: '4–5 days',
+          itinerary: [
+            { day: 'Day 1', text: 'Explore La Candelaria on foot — visit the Museo del Oro and the Catedral Primada de Colombia, then watch the sunset from Monserrate.' },
+            { day: 'Day 2', text: 'Head to the Usaquén neighbourhood for brunch and boutique shopping, then spend the afternoon at the Botero Museum.' },
+            { day: 'Day 3', text: 'Take a street-art walking tour of the Chapinero and Teusaquillo districts, followed by dinner on Zona Rosa.' },
+            { day: 'Day 4', text: 'Day trip to the Salt Cathedral of Zipaquirá, one of the most extraordinary underground churches in the world.' },
+          ]
+        },
+        {
+          id: 'lisbon',
+          name: 'Lisbon, Portugal',
+          region: 'Europe',
+          filter: 'europe',
+          img: 'https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=800&q=80',
+          desc: 'Perched on seven sun-drenched hills above the Tagus river, Lisbon enchants with golden-tiled buildings, soulful fado music, and world-class seafood.',
+          full: 'One of Europe\'s oldest and most atmospheric capitals, Lisbon rewards slow wandering. Ride the iconic yellow Tram 28 through steep alleys, visit the ornate Jerónimos Monastery, and spend evenings in a fado house in the Alfama district.',
+          bestTime: 'April to June for warm weather without the summer crowds; September and October are equally lovely.',
+          suggestedDays: '4–5 days',
+          itinerary: [
+            { day: 'Day 1', text: 'Arrive, settle into Alfama, ride Tram 28, and catch a traditional fado performance in the evening.' },
+            { day: 'Day 2', text: 'Visit Belém: Jerónimos Monastery, Torre de Belém, and the Padrão dos Descobrimentos. Try a pastel de nata at Pastéis de Belém.' },
+            { day: 'Day 3', text: 'Explore Baixa and Chiado neighbourhoods, the Museu Nacional do Azulejo, and sunset at Miradouro da Graça.' },
+            { day: 'Day 4', text: 'Day trip to Sintra — palaces, castles in the hills, and the dramatic Cabo da Roca cliffs.' },
+          ]
+        },
+        {
+          id: 'sanfrancisco',
+          name: 'San Francisco, CA',
+          region: 'North America',
+          filter: 'north-america',
+          img: 'https://images.unsplash.com/photo-1534430480872-3498386e7856?w=800&q=80',
+          desc: 'From the iconic Golden Gate Bridge to fog-draped Victorian neighbourhoods, San Francisco packs world-class food, art, and innovation into a compact city.',
+          full: 'San Francisco is a city of dramatic contrasts — dazzling bay views and hidden staircase gardens, Michelin-starred restaurants alongside century-old dim sum parlours. Its compact size makes it wonderfully walkable despite the famously steep hills.',
+          bestTime: 'September and October are the sunniest months; summer is often foggy. Spring is mild and pleasant.',
+          suggestedDays: '4–5 days',
+          itinerary: [
+            { day: 'Day 1', text: 'Walk or bike across the Golden Gate Bridge, continue into Sausalito, and take the ferry back to the Ferry Building for artisan food stalls.' },
+            { day: 'Day 2', text: 'Explore Fisherman\'s Wharf and Alcatraz Island (book tickets in advance), then dinner in North Beach.' },
+            { day: 'Day 3', text: 'Wander the Mission District murals, visit Dolores Park, and explore Hayes Valley boutiques.' },
+            { day: 'Day 4', text: 'Golden Gate Park — de Young Museum and Japanese Tea Garden — then catch the sunset from Twin Peaks.' },
+          ]
+        },
+        {
+          id: 'rome',
+          name: 'Rome, Italy',
+          region: 'Europe',
+          filter: 'europe',
+          img: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800&q=80',
+          desc: 'The Eternal City layers 2,800 years of history into every piazza, ruin, and gelato shop — there is simply nowhere else like it on earth.',
+          full: 'Rome rewards aimless wandering more than any other city. Turn a corner and stumble upon a Caravaggio in a dim church, a Baroque fountain, or a view of the Colosseum framed by umbrella pines. The food — carbonara, supplì, artichokes alla giudea — is as much a reason to visit as the ruins.',
+          bestTime: 'April–May and September–October for mild weather and smaller crowds. Avoid July–August heat.',
+          suggestedDays: '4–6 days',
+          itinerary: [
+            { day: 'Day 1', text: 'Colosseum, Roman Forum, and Palatine Hill in the morning. Trastevere for dinner.' },
+            { day: 'Day 2', text: 'Vatican Museums, Sistine Chapel, and St Peter\'s Basilica (book ahead). Prati neighbourhood for lunch.' },
+            { day: 'Day 3', text: 'Pantheon, Piazza Navona, Campo de\' Fiori market, and the Borghese Gallery (reservation required).' },
+            { day: 'Day 4', text: 'Day trip to Ostia Antica (Rome\'s well-preserved ancient port city) or the hilltop town of Orvieto.' },
+          ]
+        },
+        {
+          id: 'oslo',
+          name: 'Oslo, Norway',
+          region: 'Europe',
+          filter: 'europe',
+          img: 'https://images.unsplash.com/photo-1538332576228-eb5b4c4de6f5?w=800&q=80',
+          desc: 'A clean, cool Scandinavian capital where Viking heritage, world-class design museums, and wild fjord scenery converge in remarkable harmony.',
+          full: 'Oslo punches well above its size. The Vigeland Sculpture Park contains over 200 works in a single public space, the Viking Ship Museum houses the best-preserved longships in the world, and the Munch Museum holds the original Scream. In summer the city is bathed in near-midnight sun.',
+          bestTime: 'June to August for long days and outdoor culture. December for Christmas markets and possible Northern Lights.',
+          suggestedDays: '3–4 days',
+          itinerary: [
+            { day: 'Day 1', text: 'Stroll the Aker Brygge waterfront, visit the Viking Ship Museum, and explore Vigeland Sculpture Park.' },
+            { day: 'Day 2', text: 'The National Museum (home of The Scream), the Opera House rooftop, and the Tjuvholmen art district.' },
+            { day: 'Day 3', text: 'Take the Flåmsbana railway or fjord cruise to Sognefjord for the day — one of the most spectacular journeys in Europe.' },
+          ]
+        },
+        {
+          id: 'munich',
+          name: 'Munich, Germany',
+          region: 'Europe',
+          filter: 'europe',
+          img: 'https://images.unsplash.com/photo-1595867818082-083862f3d630?w=800&q=80',
+          desc: 'Bavaria\'s elegant capital blends beer-hall gemütlichkeit, Baroque palaces, and world-class museums in one of Germany\'s most liveable cities.',
+          full: 'Munich is far more than Oktoberfest. The Deutsches Museum is the largest science and technology museum in the world, the English Garden park is bigger than Central Park, and the day trip options — Neuschwanstein Castle, the Alps, Salzburg — are unmatched anywhere in Central Europe.',
+          bestTime: 'Late September and October (Oktoberfest) or May–June for warm weather before crowds peak.',
+          suggestedDays: '3–4 days',
+          itinerary: [
+            { day: 'Day 1', text: 'Marienplatz and the Glockenspiel, Viktualienmarkt food market, and an evening in the beer halls of Maxvorstadt.' },
+            { day: 'Day 2', text: 'Nymphenburg Palace grounds in the morning, then the Deutsches Museum or the three Pinakothek art galleries.' },
+            { day: 'Day 3', text: 'Day trip to Neuschwanstein Castle — book tickets months in advance — and the nearby Hohenschwangau Castle.' },
+          ]
+        },
+        {
+          id: 'liechtenstein',
+          name: 'Liechtenstein',
+          region: 'Europe',
+          filter: 'europe',
+          img: 'https://images.unsplash.com/photo-1530841377377-3ff06c0ca713?w=800&q=80',
+          desc: 'One of the world\'s tiniest countries, this Rhine Valley microstate surprises with a medieval castle, alpine hiking, and a genuine charm all its own.',
+          full: 'Vaduz, the capital, can be walked end-to-end in under an hour, yet the country rewards a longer stay with superb hiking trails, the Kunstmuseum Liechtenstein, and the odd pride of being one of only two doubly landlocked countries in the world.',
+          bestTime: 'May to October for hiking; December for a quiet, snowy Christmas atmosphere.',
+          suggestedDays: '1–2 days (often combined with Zurich)',
+          itinerary: [
+            { day: 'Day 1', text: 'Walk through Vaduz, visit the Kunstmuseum and the stamp museum, hike up to Vaduz Castle for panoramic Rhine Valley views.' },
+            { day: 'Day 2', text: 'Take the bus to Malbun for mountain hiking and views, or continue by train into Zurich or Salzburg.' },
+          ]
+        },
+        {
+          id: 'zurich',
+          name: 'Zurich, Switzerland',
+          region: 'Europe',
+          filter: 'europe',
+          img: 'https://images.unsplash.com/photo-1515488764276-beab7607c1e6?w=800&q=80',
+          desc: 'Switzerland\'s largest city combines a beautifully preserved medieval old town with a thriving arts scene and easy access to Alpine splendour.',
+          full: 'Zurich sits at the northern tip of Lake Zurich with the Alps visible on clear days. The Altstadt (old town) straddles the Limmat river, packed with guild houses, the Grossmünster church, and some of Europe\'s best chocolate shops. The city is also a hub for day trips into the Swiss Alps.',
+          bestTime: 'June to September for lakes and hiking; December for one of Europe\'s most charming Christmas markets.',
+          suggestedDays: '2–3 days',
+          itinerary: [
+            { day: 'Day 1', text: 'Explore the Altstadt on foot — Grossmünster, Bahnhofstrasse shopping, and an evening stroll along the Limmat.' },
+            { day: 'Day 2', text: 'Day trip to Lucerne (40 min by train) — Chapel Bridge, the Lion Monument, and a boat on Lake Lucerne.' },
+            { day: 'Day 3', text: 'Lake Zurich swim or boat ride, visit the Kunsthaus Zurich, and round off with fondue in a historic cellar restaurant.' },
+          ]
+        },
+        {
+          id: 'zermatt',
+          name: 'Zermatt, Switzerland',
+          region: 'Europe',
+          filter: 'europe',
+          img: 'https://images.unsplash.com/photo-1531210483974-4f8c1f33fd35?w=800&q=80',
+          desc: 'Nestled beneath the iconic Matterhorn, this car-free Alpine village is one of the most dramatically situated places in the world.',
+          full: 'Zermatt is a year-round mountain paradise. In winter it is one of Europe\'s finest ski resorts; in summer the hiking trails reveal wildflower meadows and glacier views that genuinely take your breath away. The Matterhorn — whether you see it wreathed in clouds or blazing in alpenglow — never loses its power.',
+          bestTime: 'December to March for skiing; late June to September for summer hiking.',
+          suggestedDays: '3–4 days',
+          itinerary: [
+            { day: 'Day 1', text: 'Arrive by the cogwheel train from Täsch, explore the village, and take the Gornergrat Railway for your first Matterhorn views.' },
+            { day: 'Day 2', text: 'Take the Klein Matterhorn cable car to Glacier Paradise (3,883m) — the highest cable car in the Alps — for glacier hiking.' },
+            { day: 'Day 3', text: 'Hike the Five Lakes Walk (Fünf-Seen-Wanderweg) for stunning reflections of the Matterhorn in mountain lakes.' },
+          ]
+        },
+        {
+          id: 'madrid',
+          name: 'Madrid, Spain',
+          region: 'Europe',
+          filter: 'europe',
+          img: 'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?w=800&q=80',
+          desc: 'Spain\'s passionate capital buzzes around the clock with a legendary art museum triangle, lively tapas bars, and a nightlife scene that only really begins after midnight.',
+          full: 'Madrid holds three of the world\'s great art museums within a 15-minute walk of each other: the Prado, the Reina Sofía, and the Thyssen-Bornemisza. The city is also a feast for eating — from traditional tabernas serving cocido madrileño to the cutting-edge restaurants of the Chueca neighbourhood.',
+          bestTime: 'March to May and September to November. Avoid August when many locals leave and the heat can be intense.',
+          suggestedDays: '3–4 days',
+          itinerary: [
+            { day: 'Day 1', text: 'Spend the morning at the Prado Museum (allow 3+ hours), then afternoon in the Retiro Park. Evening tapas crawl through La Latina.' },
+            { day: 'Day 2', text: 'Reina Sofía Museum (home of Picasso\'s Guernica), Malasaña neighbourhood, and a flamenco show.' },
+            { day: 'Day 3', text: 'El Rastro flea market (Sundays), Thyssen-Bornemisza Museum, and rooftop drinks at sunset on the Gran Vía.' },
+          ]
+        },
+        {
+          id: 'canaryislands',
+          name: 'Canary Islands, Spain',
+          region: 'Europe',
+          filter: 'europe',
+          img: 'https://images.unsplash.com/photo-1589212791014-f9c16b490a91?w=800&q=80',
+          desc: 'This volcanic archipelago off the African coast offers eternal spring weather, dramatic lava landscapes, and some of Europe\'s best beaches year-round.',
+          full: 'The Canaries are seven very different islands. Tenerife has the snow-capped Teide volcano; Lanzarote\'s black lava fields feel like another planet; La Palma is one of the world\'s best spots for stargazing. Together they offer more diversity than almost any other island group.',
+          bestTime: 'Year-round — the islands earn their "Island of Eternal Spring" nickname with temperatures rarely below 18°C or above 28°C.',
+          suggestedDays: '7–10 days (spread across 2 islands)',
+          itinerary: [
+            { day: 'Days 1–3 (Tenerife)', text: 'Tenerife base: hike Teide National Park, visit the charming town of La Orotava, and relax on Playa de Las Teresitas.' },
+            { day: 'Days 4–6 (Lanzarote)', text: 'Short flight to Lanzarote: explore the Timanfaya volcanic park by bus, visit César Manrique\'s cave home, and swim in natural lava pools.' },
+            { day: 'Days 7–9', text: 'Return to Tenerife or fly home, with optional time in the Anaga Rural Park for ancient laurel forest hikes.' },
+          ]
+        },
+        {
+          id: 'aruba',
+          name: 'Aruba',
+          region: 'Caribbean',
+          filter: 'caribbean',
+          img: 'https://images.unsplash.com/photo-1580237072353-751a8a5b2561?w=800&q=80',
+          desc: 'One Happy Island lives up to its nickname — turquoise water, powdery white sand beaches, and almost zero chance of a hurricane.',
+          full: 'Aruba sits outside the hurricane belt, giving it reliable sunshine 365 days a year. Eagle Beach is consistently ranked among the world\'s best, the snorkelling around Antilla — the Caribbean\'s largest shipwreck — is spectacular, and the colourful Dutch colonial architecture of Oranjestad makes for a charming base.',
+          bestTime: 'Any time of year — the island averages 8 hours of sunshine daily and almost never gets hurricanes.',
+          suggestedDays: '5–7 days',
+          itinerary: [
+            { day: 'Day 1', text: 'Settle in, stroll Oranjestad, and watch the sunset from the California Lighthouse.' },
+            { day: 'Days 2–3', text: 'Beach days at Eagle Beach and Baby Beach. Snorkel or dive the Antilla shipwreck.' },
+            { day: 'Day 4', text: 'Rent a UTV and explore Arikok National Park — natural pools, caves, and rugged desert landscape.' },
+            { day: 'Day 5', text: 'Windsurf at Aruba\'s famous Hadicurari beach, then an evening at a beachfront seafood restaurant.' },
+          ]
+        },
+        {
+          id: 'orlando',
+          name: 'Orlando, Florida',
+          region: 'North America',
+          filter: 'north-america',
+          img: 'https://images.unsplash.com/photo-1609137144813-7d9921338f24?w=800&q=80',
+          desc: 'The theme park capital of the world delivers non-stop entertainment — but beyond Walt Disney World lies a surprisingly diverse and exciting city.',
+          full: 'Orlando hosts more theme park visitors than anywhere on earth, but it also has a thriving arts scene, excellent food, and natural springs within an hour\'s drive. For first-timers, planning is key — the parks reward those who book dining and ride reservations well in advance.',
+          bestTime: 'September to November and January to April for shorter queues and milder weather. Avoid summer school holidays.',
+          suggestedDays: '5–8 days (theme parks require time)',
+          itinerary: [
+            { day: 'Days 1–2', text: 'Walt Disney World Magic Kingdom and EPCOT — arrive at rope drop, use Lightning Lane for headliners, and stay for the evening fireworks.' },
+            { day: 'Days 3–4', text: 'Universal Orlando Resort — both parks in two days with an Express Pass. Wizarding World of Harry Potter is unmissable.' },
+            { day: 'Day 5', text: 'Kennedy Space Center day trip (1 hour east) for the most moving space history experience in the US.' },
+            { day: 'Day 6', text: 'Wekiwa Springs State Park for tubing and wildlife — a perfect contrast to the parks.' },
+          ]
+        },
+        {
+          id: 'boston',
+          name: 'Boston, Massachusetts',
+          region: 'North America',
+          filter: 'north-america',
+          img: 'https://images.unsplash.com/photo-1501979376754-f8aff4a1d0c5?w=800&q=80',
+          desc: 'America\'s most walkable major city layers Revolutionary War history, ivy-league academia, and a ferociously proud food and sports culture.',
+          full: 'The Freedom Trail alone justifies a visit — 2.5 miles of red brick threading through 16 historic sites including Paul Revere\'s house, the Old North Church, and Bunker Hill. But Boston also excels at lobster rolls, clam chowder, weekend farmer\'s markets in the South End, and day trips to Cape Cod or Salem.',
+          bestTime: 'September to November for fall foliage and mild weather. April through June is also excellent.',
+          suggestedDays: '3–4 days',
+          itinerary: [
+            { day: 'Day 1', text: 'Walk the Freedom Trail from Boston Common to the USS Constitution in Charlestown (full day).' },
+            { day: 'Day 2', text: 'Harvard and MIT campuses in Cambridge, the Isabella Stewart Gardner Museum, and dinner in the South End.' },
+            { day: 'Day 3', text: 'Quincy Market, a whale-watching cruise from Long Wharf, or a day trip to Salem or Cape Cod.' },
+          ]
+        },
+        {
+          id: 'newyork',
+          name: 'New York, New York',
+          region: 'North America',
+          filter: 'north-america',
+          img: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=800&q=80',
+          desc: 'The city that never sleeps needs no introduction — five boroughs of relentless energy, culture, food, and spectacle unlike anywhere else on earth.',
+          full: 'New York rewards return visits endlessly. Each borough has its own personality: Manhattan\'s skyline drama, Brooklyn\'s creative energy, Queens\'s unrivalled food diversity, the Bronx\'s Yankee Stadium and botanical garden, and Staten Island\'s ferry views. No one ever runs out of things to see.',
+          bestTime: 'April–June and September–November for pleasant weather. December is magical despite the crowds.',
+          suggestedDays: '5–7 days minimum',
+          itinerary: [
+            { day: 'Day 1', text: 'Central Park, the Metropolitan Museum of Art, and the Upper West Side. Evening on the High Line.' },
+            { day: 'Day 2', text: 'Brooklyn Bridge walk, DUMBO neighbourhood, Brooklyn Heights Promenade views, and a slice at Di Fara Pizza.' },
+            { day: 'Day 3', text: 'One World Trade Center and Memorial, the Financial District, and a sunset from Top of the Rock or the Edge.' },
+            { day: 'Day 4', text: 'The Frick Collection, Museum of Modern Art (MoMA), Chelsea galleries, and Chelsea Market.' },
+            { day: 'Day 5', text: 'Queens food tour: Jackson Heights for South Asian food, Flushing for the best dim sum outside Hong Kong.' },
+          ]
+        },
+        {
+          id: 'niagarafalls',
+          name: 'Niagara Falls, Ontario',
+          region: 'North America',
+          filter: 'north-america',
+          img: 'https://images.unsplash.com/photo-1489447068241-b3490214e879?w=800&q=80',
+          desc: 'The Canadian side delivers the most spectacular view of the falls — an overwhelming curtain of water that demands to be experienced in person.',
+          full: 'While both the US and Canadian sides offer views, the Canadian side is definitive. The Horseshoe Falls, Journey Behind the Falls, and Hornblower (now Niagara City Cruises) boat tour get you so close the mist soaks you through. Niagara-on-the-Lake, 20 minutes away, adds excellent wine and a charming historic town.',
+          bestTime: 'June to September for boat tours and full flow. March to April when ice formations break up is uniquely beautiful.',
+          suggestedDays: '2–3 days',
+          itinerary: [
+            { day: 'Day 1', text: 'Arrive, do the Hornblower boat cruise, walk the Niagara Parkway to both Horseshoe and American Falls.' },
+            { day: 'Day 2', text: 'Journey Behind the Falls in the morning, then drive to Niagara-on-the-Lake for wine tasting and a stroll through the historic town.' },
+            { day: 'Day 3', text: 'Niagara Glen Nature Reserve hiking trails, or cross the Rainbow Bridge to the US side for a different perspective.' },
+          ]
+        },
+        {
+          id: 'toronto',
+          name: 'Toronto, Ontario',
+          region: 'North America',
+          filter: 'north-america',
+          img: 'https://images.unsplash.com/photo-1517090504586-fde19ea6066f?w=800&q=80',
+          desc: 'Canada\'s largest and most multicultural city serves up an extraordinary range of neighbourhoods, food cultures, and big-city energy on Lake Ontario.',
+          full: 'Toronto is one of the most diverse cities on earth — over 140 languages are spoken here. The result is an extraordinary food scene: dim sum in Chinatown, Jamaican patties in Kensington Market, Ethiopian injera in Little Ethiopia. The CN Tower, the Distillery District, and the Art Gallery of Ontario anchor the sightseeing.',
+          bestTime: 'June to September for outdoor festivals and lake activities. October for fall foliage.',
+          suggestedDays: '3–4 days',
+          itinerary: [
+            { day: 'Day 1', text: 'CN Tower, Ripley\'s Aquarium, and the waterfront. Evening in the Distillery District.' },
+            { day: 'Day 2', text: 'Kensington Market and Chinatown food crawl, Art Gallery of Ontario, and the Village neighbourhood.' },
+            { day: 'Day 3', text: 'Toronto Islands ferry for skyline views and beaches, then explore the Annex and Bloor-Yorkville.' },
+          ]
+        },
+        {
+          id: 'cabo',
+          name: 'Cabo San Lucas, Mexico',
+          region: 'North America',
+          filter: 'north-america',
+          img: 'https://images.unsplash.com/photo-1605649487212-47bdab064df7?w=800&q=80',
+          desc: 'Where the Pacific meets the Sea of Cortez, Cabo offers a perfect blend of dramatic desert scenery, world-class sport fishing, and spectacular beaches.',
+          full: 'The iconic rock arch El Arco de Cabo San Lucas is one of Mexico\'s most photographed landmarks. The Sea of Cortez — which Jacques Cousteau called the "Aquarium of the World" — offers extraordinary snorkelling, whale watching (December–April), and sea lion colonies. The restaurant scene has grown dramatically in recent years.',
+          bestTime: 'October to May for dry weather and whale watching in winter. Avoid July–September hurricane season.',
+          suggestedDays: '4–6 days',
+          itinerary: [
+            { day: 'Day 1', text: 'Glass-bottom boat to El Arco and Lover\'s Beach (only accessible by water). Sundowner cocktails on the marina.' },
+            { day: 'Day 2', text: 'Snorkelling at Pelican Rock, then a long afternoon at Médano Beach.' },
+            { day: 'Day 3', text: 'ATV ride through the Sonoran Desert, tequila distillery tour, and an evening in San José del Cabo\'s art district.' },
+            { day: 'Day 4', text: 'Deep-sea fishing charter — Cabo is the "Marlin Capital of the World." Book at least a week ahead.' },
+          ]
+        },
+        {
+          id: 'rio',
+          name: 'Rio de Janeiro, Brazil',
+          region: 'South America',
+          filter: 'south-america',
+          img: 'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=800&q=80',
+          desc: 'Few cities match Rio\'s sheer visual drama — mountains plunge into the sea, iconic beaches stretch for miles, and Christ the Redeemer watches over it all.',
+          full: 'Rio de Janeiro is a city of extraordinary contrasts and beauty. The Tijuca Forest — the world\'s largest urban rainforest — rises directly behind the city\'s famous beach strip. Beyond Copacabana and Ipanema, the Santa Teresa neighbourhood, the Selarón Steps, and the lively Lapa music scene reveal a city of deep cultural richness.',
+          bestTime: 'April to June and August to October avoid peak summer heat and carnival crowds (unless you want carnival — then February).',
+          suggestedDays: '4–6 days',
+          itinerary: [
+            { day: 'Day 1', text: 'Take the cog railway to Christ the Redeemer at sunrise, then cable car up Sugarloaf Mountain at sunset.' },
+            { day: 'Day 2', text: 'Beach day on Ipanema and Copacabana; explore the Leblon neighbourhood for dinner.' },
+            { day: 'Day 3', text: 'Santa Teresa neighbourhood walking tour, Selarón Steps, Lapa arches, and an evening samba club.' },
+            { day: 'Day 4', text: 'Tijuca National Park hike, Botanical Garden, and the Museum of Tomorrow on the redeveloped port.' },
+          ]
+        },
+        {
+          id: 'vienna',
+          name: 'Vienna, Austria',
+          region: 'Europe',
+          filter: 'europe',
+          img: 'https://images.unsplash.com/photo-1516550893923-42d28e5677af?w=800&q=80',
+          desc: 'The former capital of the Habsburg Empire retains an imperial grandeur that few cities can match, wrapped in café culture, classical music, and Baroque splendour.',
+          full: 'Vienna is a city that takes pleasure seriously. The coffeehouse tradition — spending hours over a Melange and a slice of Sachertorte — is UNESCO-listed. The Kunsthistorisches Museum, the Belvedere, and the Vienna State Opera set an impossibly high cultural bar. Even the underground stations are decorated with art.',
+          bestTime: 'April to May and September to October for mild weather. December for the famous Viennese Christmas markets.',
+          suggestedDays: '3–4 days',
+          itinerary: [
+            { day: 'Day 1', text: 'Schönbrunn Palace and gardens in the morning, then the Naschmarkt outdoor food market, and the Vienna State Opera area.' },
+            { day: 'Day 2', text: 'Kunsthistorisches Museum, the Imperial Hofburg Palace, and a performance at the Musikverein or Konzerthaus.' },
+            { day: 'Day 3', text: 'Belvedere Palace for Klimt\'s The Kiss, the Prater park and Ferris wheel, and an evening coffeehouse ritual.' },
+          ]
+        },
+        {
+          id: 'prague',
+          name: 'Prague, Czechia',
+          region: 'Europe',
+          filter: 'europe',
+          img: 'https://images.unsplash.com/photo-1592906209472-a36b1f3782ef?w=800&q=80',
+          desc: 'The "City of a Hundred Spires" is Central Europe\'s fairy-tale capital — a Gothic and Baroque skyline rising above the Vltava river, miraculously intact.',
+          full: 'Prague escaped the devastation of World War II and emerged with its medieval core almost perfectly preserved. The Old Town Square, the Charles Bridge at dawn, and Prague Castle at night are among the most beautiful urban views in Europe. Czech cuisine has also evolved far beyond goulash — the restaurant scene is genuinely exciting now.',
+          bestTime: 'May to June and September to October for pleasant weather and smaller crowds. December is magical with Christmas markets.',
+          suggestedDays: '3–4 days',
+          itinerary: [
+            { day: 'Day 1', text: 'Old Town Square (Astronomical Clock), Josefov (the Jewish Quarter), and a sunset walk across Charles Bridge.' },
+            { day: 'Day 2', text: 'Prague Castle complex (a half-day alone) — St Vitus Cathedral, the Royal Palace, and Golden Lane. Malá Strana for lunch.' },
+            { day: 'Day 3', text: 'Vyšehrad fortress for panoramic views, the Dancing House, and an evening of Czech jazz in a Žižkov club.' },
+          ]
+        },
+      ];
+
+      // Render cards
+      const grid = document.getElementById('grid');
+      destinations.forEach(d => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.dataset.filter = d.filter;
+        card.id = d.id;
+        card.innerHTML = `
+          <img class="card-img" src="${d.img}" alt="${d.name}" loading="lazy"/>
+          <div class="card-body">
+            <div class="card-tag">${d.region}</div>
+            <h3>${d.name}</h3>
+            <p>${d.desc}</p>
+            <span class="card-link">View itinerary →</span>
+          </div>
+        `;
+        card.addEventListener('click', () => openModal(d));
+        grid.appendChild(card);
+      });
+
+      // Filter
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const f = btn.dataset.filter;
+          document.querySelectorAll('.card').forEach(c => {
+            c.classList.toggle('hidden', f !== 'all' && c.dataset.filter !== f);
+          });
+        });
+      });
+
+      // Modal
+      function openModal(d) {
+        document.getElementById('modalImg').src = d.img;
+        document.getElementById('modalImg').alt = d.name;
+        document.getElementById('modalTag').textContent = d.region;
+        document.getElementById('modalTitle').textContent = d.name;
+        document.getElementById('modalMeta').innerHTML = `Suggested stay <span>·</span> ${d.suggestedDays}`;
+        document.getElementById('modalDesc').textContent = d.full;
+        document.getElementById('modalTime').textContent = d.bestTime;
+        const itin = document.getElementById('modalItinerary');
+        itin.innerHTML = d.itinerary.map(i => `
+          <div class="itinerary-day">
+            <strong>${i.day}</strong>
+            <p>${i.text}</p>
+          </div>
+        `).join('');
+        document.getElementById('modalOverlay').classList.add('open');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeModal() {
+        document.getElementById('modalOverlay').classList.remove('open');
+        document.body.style.overflow = '';
+      }
+
+      document.getElementById('modalClose').addEventListener('click', closeModal);
+      document.getElementById('modalOverlay').addEventListener('click', e => {
+        if (e.target === document.getElementById('modalOverlay')) closeModal();
+      });
+
+      // Scroll to anchor from homepage links
+      const hash = window.location.hash.replace('#','');
+      if (hash) {
+        setTimeout(() => {
+          const el = document.getElementById(hash);
+          if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.click(); }
+        }, 300);
+      }
+    </script>
+  </body>
+</html>
